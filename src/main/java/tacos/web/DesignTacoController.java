@@ -3,13 +3,16 @@ package tacos.web;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import tacos.Ingredient;
 import tacos.Ingredient.Type;
 import tacos.Taco;
 
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,9 +54,14 @@ public class DesignTacoController {
 	}
 
 	@PostMapping
-	public String processDesign(Taco design) {
-		// Save the taco design...
-		// We'll do this in chapter 3
+	public String processDesign(@Valid @ModelAttribute("design") Taco design, Errors errors, Model model) {
+		if (errors.hasErrors()) {
+			// 此处有两个异常：
+			// 一是直接返回到页面，有提示信息，但是没有表单内容（动态生成的部分）；
+			// 二是重定向到 redirect:/design 会缺少提示信息
+			return "design";
+		}
+
 		log.info("Processing design: " + design);
 
 		return "redirect:/orders/current";
