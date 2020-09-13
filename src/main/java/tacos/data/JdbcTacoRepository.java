@@ -41,18 +41,14 @@ public class JdbcTacoRepository implements TacoRepository {
 
   private long saveTacoInfo(Taco taco) {
     taco.setCreatedAt(new Date());
-    PreparedStatementCreator psc =
-        new PreparedStatementCreatorFactory(
-            "insert into Taco (name, createdAt) values (?, ?)",
-            Types.VARCHAR, Types.TIMESTAMP
-        ).newPreparedStatementCreator(
-            Arrays.asList(
-                taco.getName(),
-                new Timestamp(taco.getCreatedAt().getTime())));
+    PreparedStatementCreatorFactory factory = new PreparedStatementCreatorFactory("insert into Taco (name, createdAt) values (?, ?)", Types.VARCHAR,Types.TIMESTAMP);
+    PreparedStatementCreator creator = factory.newPreparedStatementCreator(Arrays.asList(taco.getName(),new Timestamp(taco.getCreatedAt().getTime())));
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
-    jdbc.update(psc, keyHolder);
-    // todo 无法获取 id
+    factory.setReturnGeneratedKeys(true); //允许返回主键值
+    jdbc.update(creator, keyHolder);
+    // 2020/09/06 无法获取 id
+    // 2020/09/13 通过此片文章解决：https://blog.csdn.net/AbstractLiu/article/details/105545776
     return keyHolder.getKey().longValue();
   }
 
